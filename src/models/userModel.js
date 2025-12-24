@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "please provide a password"],
   },
   // user will be verified using mail
-  isVarified: {
+  isVerified: {
     type: Boolean,
     default: false,
   },
@@ -27,9 +27,9 @@ const userSchema = new mongoose.Schema({
   forgotPasswordToken: String,
   forgotPasswordTokenExpiry: Date,
   verifyToken: String,
-  verigyTokenExpiry: Date,
+  verifyTokenExpiry: Date,
 });
 
-const User = mongoose.models.users || mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;
