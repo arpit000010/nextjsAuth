@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import {connect} from '@/dbConfig/dbConfig'
 import User from '@/models/userModel'
 
-connect()
+
 
 export async function POST(request: NextRequest){
-
+    await connect()
     try{
 
         const reqBody = await request.json()

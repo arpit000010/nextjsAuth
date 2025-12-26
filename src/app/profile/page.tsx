@@ -1,56 +1,100 @@
 "use client";
+
 import axios from "axios";
-import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  isVerified: boolean;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
-  const [data, setData] = useState("nothing");
+
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // fetch logged-in user
+  const getUserDetails = async () => {
+    try {
+      const res = await axios.get("/api/users/me");
+      setUser(res.data.data);
+    } catch (error: any) {
+      toast.error("Session expired. Please login again.");
+      router.push("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const logout = async () => {
     try {
       await axios.get("/api/users/logout");
-      toast.success("Logout Successful");
+      toast.success("Logged out successfully");
       router.push("/login");
     } catch (error: any) {
-      console.log(error.message);
-      toast.error(error.message);
+      toast.error("Logout failed");
     }
   };
 
-  const getUserDetails = async () => {
-    const res = await axios.get("/api/users/me");
-    console.log(res.data);
-    setData(res.data.data._id);
-  };
+  useEffect(() => {
+    getUserDetails();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        Loading profile...
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1>Profile</h1>
-      <hr />
-      <h1>Profile page</h1>
-      <h2 className="p-1 rounded bg-green-500">
-        {data === "nothing" ? (
-          "Nothing"
-        ) : (
-          <Link href={`/profile/${data}`}>{data}</Link>
-        )}
-      </h2>
-      <hr />
-      <hr />
-      <button
-        onClick={logout}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-      >
-        Logout
-      </button>
-      <button
-        onClick={getUserDetails}
-        className="bg-green-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-      >
-        Get User Details
-      </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black">
+      <div className="w-full max-w-md rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl p-8 text-white">
+        {/* Heading */}
+        <h1 className="text-3xl font-semibold text-center mb-6">Profile</h1>
+
+        {/* User Info */}
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm text-gray-400">Username</p>
+            <p className="text-lg font-medium">{user?.username}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-400">Email</p>
+            <p className="text-lg font-medium">{user?.email}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-400">Verification Status</p>
+            <span
+              className={`inline-block mt-1 px-3 py-1 rounded-full text-sm ${
+                user?.isVerified
+                  ? "bg-green-600/20 text-green-400"
+                  : "bg-red-600/20 text-red-400"
+              }`}
+            >
+              {user?.isVerified ? "Verified" : "Not Verified"}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-8 space-y-3">
+          <button
+            onClick={logout}
+            className="w-full rounded-lg py-2 font-medium bg-gradient-to-r from-red-500 to-pink-500 hover:opacity-90 transition"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

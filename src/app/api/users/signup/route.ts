@@ -4,16 +4,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcryptjs from 'bcryptjs'
 import { sendEmail } from '@/helpers/mailer'
 
-connect()
+
 
 export async function POST(request: NextRequest){
-
+    console.log("MONGO_URI : ", process.env.MONGO_URI)
+    await connect();
     try{
 
         const reqBody = await request.json()
         const {username, email, password} = reqBody
 
         console.log(reqBody)
+        if (!username || !email || !password) {
+        return NextResponse.json({ error: "Missing fields" }, { status: 400 })
+        }
+
 
         // check if user already exists 
         const user = await User.findOne({email})
@@ -51,7 +56,6 @@ export async function POST(request: NextRequest){
             {
                 message: 'User created successfully',
                 success: true,
-                savedUser
             },
             {
                 status: 200

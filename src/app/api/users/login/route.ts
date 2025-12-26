@@ -16,6 +16,15 @@ export async function POST(request: NextRequest){
 
         const user = await User.findOne({email})
 
+        if (!user.isVerified) {
+            console.log('please verify your email before login')
+            return NextResponse.json(
+                { error: "Please verify your email before login" },
+                { status: 403 }
+            )
+        }
+
+
         if(!user)
             return NextResponse.json(
                 {

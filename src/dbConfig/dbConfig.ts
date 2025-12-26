@@ -1,28 +1,20 @@
 import mongoose from "mongoose";
 
-
 export async function connect(){
 
     try{
 
-        mongoose.connect(process.env.MONGO_URI!)
-        const connection = mongoose.connection
+        if(mongoose.connection.readyState >= 1)
+            return
+    
+        await mongoose.connect(process.env.MONGO_URI!)
 
-        // if connection is successful
-        connection.on('connected', ()=>{
-            console.log("MongoDB connected successfully")
-        })
-
-        // if connection is unsuccessful
-        connection.on('error', (err)=>{
-            console.log('MongoDB connection error. Please make sure MongoDB is running. ' + err)
-            process.exit()
-        })
-
+        console.log('MongoDB connected')
 
     } catch (err) {
         console.log('Something goes wrong...')
         console.log(err)
+        throw err
     }
 
 }
